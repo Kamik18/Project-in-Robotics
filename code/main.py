@@ -1,4 +1,4 @@
-from .URController import URController
+from .ur_controller.ur_controller import URController
 
 if __name__ == "__main__":
     # Universal Robots controller
@@ -19,11 +19,14 @@ if __name__ == "__main__":
 
         # State 0: Move to home
         if state == 0:
-            if ur_controller.move_to_home():
-                state = 1
-            else:
+            if not ur_controller.move_to_home():
                 print("Error moving to home")
                 break
+            if not ur_controller.calibrate_force_sensor():
+                print("Error calibrating force sensor")
+                break
+
+            state = 1
 
         # State 1: Move to seedling
         elif state == 1:
