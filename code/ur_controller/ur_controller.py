@@ -1,6 +1,5 @@
 import time
 import logging
-import sys
 from rtde_control import RTDEControlInterface as RTDEControl
 from rtde_receive import RTDEReceiveInterface as RTDEReceive
 from rtde_io import RTDEIOInterface as RTDEIO
@@ -237,7 +236,7 @@ class URController(object):
         self.logger.info(f"URController move_to_object({x}, {y}, {z})")
 
         if z is None:
-            # TODO assert height before moving to x, y
+            # Get the current z
             _, _, z, _,_,_ = self.rtde_r.getActualTCPPose()
 
         # Assert x, y are within range

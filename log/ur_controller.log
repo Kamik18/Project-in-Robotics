@@ -1,23 +1,22 @@
-2023-10-12 14:23:53,189 - URController - INFO - URController init
-2023-10-12 14:23:54,769 - URController - INFO - URController connected to the robot
-2023-10-12 14:23:54,770 - URController - INFO - URController digital_out(4, True)
-2023-10-12 14:23:55,771 - URController - INFO - URController digital_out(4, True) finished
-2023-10-12 14:23:55,771 - URController - INFO - URController digital_out(4, False)
-2023-10-12 14:23:56,773 - URController - INFO - URController digital_out(4, False) finished
-2023-10-12 14:23:56,773 - URController - INFO - URController move_to_home()
-2023-10-12 14:23:56,778 - URController - INFO - URController move_to_home() finished
-2023-10-12 14:23:56,778 - URController - INFO - URController calibrate_force_sensor()
-2023-10-12 14:23:57,182 - URController - INFO - Force sensor calibrated
-2023-10-12 14:23:57,182 - URController - INFO - URController move_to_object(-0.5, -0.5, None)
-2023-10-12 14:24:04,123 - URController - INFO - URController move_to_object(-0.5, -0.5, 0.2500012599865251) finished
-2023-10-12 14:24:04,124 - URController - INFO - URController move_z(0.13)
-2023-10-12 14:24:07,026 - URController - INFO - URController move_z(0.13) finished
-2023-10-12 14:24:07,026 - URController - INFO - URController move_z(0.25)
-2023-10-12 14:24:09,928 - URController - INFO - URController move_z(0.25) finished
-2023-10-12 14:24:09,929 - URController - INFO - URController move_z(0.13)
-2023-10-12 14:24:12,795 - URController - WARNING - Pose reached with force 0.8755129313862418 N
-2023-10-12 14:24:12,834 - URController - INFO - URController move_z(0.13) finished
-2023-10-12 14:24:12,834 - URController - INFO - URController move_z(0.25)
-2023-10-12 14:24:15,736 - URController - INFO - URController move_z(0.25) finished
-2023-10-12 14:24:15,736 - URController - INFO - URController move_to_home()
-2023-10-12 14:24:22,678 - URController - INFO - URController move_to_home() finished
+2023-10-12 14:37:56,189 - URController - INFO - URController init
+2023-10-12 14:37:57,690 - URController - INFO - URController connected to the robot
+2023-10-12 14:37:57,691 - URController - INFO - URController move_to_home()
+2023-10-12 14:38:06,931 - URController - INFO - URController move_to_home() finished
+2023-10-12 14:38:06,932 - URController - INFO - URController calibrate_force_sensor()
+2023-10-12 14:38:07,336 - URController - INFO - Force sensor calibrated
+2023-10-12 14:38:07,336 - URController - INFO - URController move_to_object(-0.5, -0.5, None)
+2023-10-12 14:38:14,277 - URController - INFO - URController move_to_object(-0.5, -0.5, 0.24995898306177644) finished
+2023-10-12 14:38:14,278 - URController - INFO - URController move_z(0.13)
+2023-10-12 14:38:17,179 - URController - INFO - URController move_z(0.13) finished
+2023-10-12 14:38:17,179 - URController - INFO - URController digital_out(4, True)
+2023-10-12 14:38:18,181 - URController - INFO - URController digital_out(4, True) finished
+2023-10-12 14:38:18,181 - URController - INFO - URController move_z(0.25)
+2023-10-12 14:38:21,079 - URController - INFO - URController move_z(0.25) finished
+2023-10-12 14:38:21,080 - URController - INFO - URController move_to_object(-0.8, -0.5, None)
+2023-10-12 14:38:26,349 - URController - INFO - URController move_to_object(-0.8, -0.5, 0.24991308222905517) finished
+2023-10-12 14:38:26,350 - URController - INFO - URController move_z(0.13)
+2023-10-12 14:38:29,249 - URController - INFO - URController move_z(0.13) finished
+2023-10-12 14:38:29,249 - URController - INFO - URController digital_out(4, False)
+2023-10-12 14:38:30,258 - URController - INFO - URController digital_out(4, False) finished
+2023-10-12 14:38:30,258 - URController - INFO - URController move_z(0.25)
+2023-10-12 14:38:33,156 - URController - INFO - URController move_z(0.25) finished
