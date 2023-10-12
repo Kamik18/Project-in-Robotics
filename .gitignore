@@ -1,0 +1,5 @@
+# Folders
+.vscode/*
+
+# Python files
+**/__pycache__/*
