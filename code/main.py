@@ -1,9 +1,11 @@
 from .URController import URController
 
 if __name__ == "__main__":
-    print("Hello World!")
-
+    # Universal Robots controller
     ur_controller = URController()
+
+    # Camera
+    # TODO
 
     state = 0
     while True:
