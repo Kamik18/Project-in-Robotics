@@ -1,4 +1,4 @@
-from ur_controller.ur_controller import URController, D_OUT_GRIPPER
+from ur_controller.ur_controller import *
 #from .ur_controller.ur_controller import URController, D_OUT_GRIPPER
 
 import logging
@@ -125,6 +125,18 @@ if __name__ == "__main__":
         else:
             logger.error("Invalid state")
             break
+
+    print("move home: center")
+    ur_controller.move_to_home(orientation=ORIENTATION_CENTER)
+    time.sleep(5)
+    print("move home: left")
+    ur_controller.move_to_home(orientation=ORIENTATION_LEFT)
+    time.sleep(5)
+    print("move home: right")
+    ur_controller.move_to_home(orientation=ORIENTATION_RIGHT)
+    time.sleep(5)
+    ur_controller.move_to_home()
+
 
 
         

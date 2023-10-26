@@ -3,25 +3,34 @@ import logging
 from rtde_control import RTDEControlInterface as RTDEControl
 from rtde_receive import RTDEReceiveInterface as RTDEReceive
 from rtde_io import RTDEIOInterface as RTDEIO
+import numpy as np
+import cv2
+
 
 # Digital output pins
 D_OUT_GRIPPER = 4
+
+
+# Orientations
+ORIENTATION_CENTER: list = [1.826, 2.555, 0.0]  # (rx, ry, rz)
+ORIENTATION_LEFT: list = [1.826 - np.pi/2, 2.555, 0.0]  # (rx, ry, rz)
+ORIENTATION_RIGHT: list = [1.826 + np.pi/2, 2.555, 0.0]  # (rx, ry, rz)
 
 
 class URController(object):
     """Class for controlling the UR robot
     """
     # Ranges for x, y, z coordinates
-    x_range = (-0.95, -0.3)  # (m) -300 mm to -950 mm
-    y_range = (-0.765, -0.05)  # (m) -100 mm to -765 mm 
-    z_range = (0.125, 0.2, 0.55)  # (m) 125 250 to 550
+    x_range = (-0.1, 0.7)  # (m)
+    y_range = (0.0, 0.65)  # (m)
+    z_range = (0.09, 0.1, 0.55)  # (m)
 
     # Home position
-    home = (-0.35, -0.1, 0.25, 1.826, 2.555 ,0.0)  # (m), (x, y, z, rx, ry, rz)
-    ORIENTATION:list = [1.826, 2.555 ,0.0]  # (rx, ry, rz)
-    VELOCITY:float = 0.1
-    ACCELERATION:float = 0.1
-    
+    home: list = [0.0, 0.1, 0.25]  # (m), (x, y, z)
+
+    VELOCITY: float = 0.1
+    ACCELERATION: float = 0.1
+
     def __init__(self) -> None:
         """Constructor for URController
         """
@@ -31,15 +40,14 @@ class URController(object):
         fh.setLevel(log_level)
         fh.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
         fh.set_name("URController")
-        
+
         self.logger = logging.getLogger("URController")
         self.logger.setLevel(log_level)
         self.logger.addHandler(fh)
 
-
         self.logger.info("URController init")
         IP = "192.168.100.10"
-       
+
         try:
             self.rtde_c = RTDEControl(IP)
             self.rtde_r = RTDEReceive(IP)
@@ -50,8 +58,17 @@ class URController(object):
             self.rtde_c = RTDEControl(IP)
             self.rtde_r = RTDEReceive(IP)
             self.rtde_io = RTDEIO(IP)
-        
+
         self.logger.info("URController connected to the robot")
+
+        self.rotation: list = [1.826, 2.555, 0.0]
+
+        # Map x,y from table to base coordinates
+        table_points: np.ndarray = np.array([[0, 0], [0, 0.6], [0.6, 0.6], [0.6, 0]])  # (m)
+        base_points: np.ndarray = np.array([[-95.0, -688.4], [-326.55, -134.1], [-877.4, -363.95], [-647.7, -918.5]]) / 1000  # (m)
+        # base_points:np.ndarray = np.array([[-91.4, -689.6], [-327.5, -139.4], [-879.2, -368.6], [-652.8, -922.1]]) / 1000  # (m)
+        self.homography_table_base = cv2.findHomography(np.array(table_points), np.array(base_points))[0]
+        self.homography_base_table = cv2.findHomography(np.array(base_points), np.array(table_points))[0]
 
     def __del__(self) -> None:
         """Destructor for URController
@@ -71,7 +88,6 @@ class URController(object):
             self.rtde_r.disconnect()
         except:
             print("Robot failed to terminate")
-        
 
     def _assert_range(self, x: float = None, y: float = None, z: float = None) -> bool:
         """Asserts that the given x, y, z coordinates are within range
@@ -108,6 +124,23 @@ class URController(object):
                     return False
 
         return True
+
+    def _move(self, position: list, speed: float = VELOCITY, acceleration: float = ACCELERATION, assync: bool = False) -> None:
+        """Moves the robot to the given position
+
+        Args:
+            position (list): position (x, y, z, rx, ry, rz)
+            speed (float, optional): speed. Defaults to VELOCITY.
+            acceleration (float, optional): acceleration. Defaults to ACCELERATION.
+            assync (bool, optional): True if assync, False otherwise. Defaults to False.
+        """
+        # Change from base to table coordinates
+        if position[0] is not None and position[1] is not None:
+            position[0], position[1] = np.matmul(self.homography_table_base, np.array([position[0], position[1], 1]))[:2]
+            self.last_pos = position
+        else:
+            position[0], position[1] = self.last_pos[:2]
+        self.rtde_c.moveL(position, speed, acceleration, assync)
 
     def calibrate_force_sensor(self) -> bool:
         """Calibrates the force sensor
@@ -164,7 +197,8 @@ class URController(object):
         self.logger.info(f"URController move_z({z})")
 
         # Assert z is within range
-        x, y, z_, _,_,_ = self.rtde_r.getActualTCPPose()
+        _, _, z_, _, _, _ = self.rtde_r.getActualTCPPose()
+
         if not self._assert_range(z=z_):
             return False
 
@@ -174,10 +208,10 @@ class URController(object):
             assync = True
 
         # Define the position
-        pos = [x, y, z] + self.ORIENTATION
+        pos = [None, None, z] + self.rotation
 
         # Move to the given z coordinate
-        self.rtde_c.moveL(pos, self.VELOCITY, self.ACCELERATION, assync)
+        self._move(pos, assync=assync)
 
         if force is not None:
             while True:
@@ -187,22 +221,24 @@ class URController(object):
                     break
 
                 # Validate the distance between the current z and the target z
-                _, _, z_, _,_,_ = self.rtde_r.getActualTCPPose()
-                if abs(z - z_) < 0.0001: # 0.1 mm
+                _, _, z_, _, _, _ = self.rtde_r.getActualTCPPose()
+                if abs(z - z_) < 0.0001:  # 0.1 mm
                     self.logger.warning(f"Pose reached with force {force_tcp[2]} N")
                     break
 
             # Stop the robot movement
             self.rtde_c.stopL(0.1)
-        
+
         self.logger.info(f"URController move_z({z}) finished")
 
         # Reached the target z
         return True
-    
 
-    def move_to_home(self) -> bool:
+    def move_to_home(self, orientation: list = ORIENTATION_CENTER) -> bool:
         """Moves the robot to the home position
+
+        Args:
+            orientation (list): orientation (rx, ry, rz)
 
         Returns:
             bool: True if successful, False otherwise
@@ -210,12 +246,24 @@ class URController(object):
         self.logger.info("URController move_to_home()")
 
         # Assert z is within range
-        x, y, z, _,_,_ = self.rtde_r.getActualTCPPose()
-     
+        x, y, z, _, _, _ = self.rtde_r.getActualTCPPose()
+
+        # Map x,y from base to table coordinates
+        x, y = np.matmul(self.homography_base_table, np.array([x, y, 1]))[:2]
+
         if not self._assert_range(x=x, y=y, z=z):
             return False
 
-        self.rtde_c.moveL(self.home, self.VELOCITY, self.ACCELERATION)
+        if len(orientation) != 3:
+            self.logger.error(f"Invalid orientation {orientation}")
+            return False
+
+        # Assert orientation is ORIENTATION_CENTER, ORIENTATION_LEFT or ORIENTATION_RIGHT
+        if orientation not in [ORIENTATION_CENTER, ORIENTATION_LEFT, ORIENTATION_RIGHT]:
+            self.logger.error(f"Invalid orientation {orientation}")
+            return False
+
+        self._move(self.home + orientation)
 
         self.logger.info("URController move_to_home() finished")
 
@@ -226,9 +274,9 @@ class URController(object):
         """Moves the robot to the given x, y coordinate
 
         Args:
-            x (float): x coordinate
-            y (float): y coordinate
-            z (float, optional): z coordinate. Defaults to None.
+            x (float): x coordinate (m)
+            y (float): y coordinate (m)
+            z (float, optional): z coordinate (m). Defaults to None.
 
         Returns:
             bool: True if successful, False otherwise
@@ -237,18 +285,46 @@ class URController(object):
 
         if z is None:
             # Get the current z
-            _, _, z, _,_,_ = self.rtde_r.getActualTCPPose()
+            _, _, z, _, _, _ = self.rtde_r.getActualTCPPose()
 
         # Assert x, y are within range
         if not self._assert_range(x=x, y=y, z=z):
             return False
 
-        pos = [x, y, z] + self.ORIENTATION
-        self.rtde_c.moveL(pos, self.VELOCITY, self.ACCELERATION)
+        pos = [x, y, z] + self.rotation
+
+        self._move(pos)
 
         self.logger.info(f"URController move_to_object({x}, {y}, {z}) finished")
 
         # Reached the target x, y
+        return True
+
+    def set_orientation(self, orientation: list) -> bool:
+        """Sets the orientation of the robot
+
+        Args:
+            orientation (list): orientation (rx, ry, rz)
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        self.logger.info(f"URController set_orientation({orientation})")
+
+        if len(orientation) != 3:
+            self.logger.error(f"Invalid orientation {orientation}")
+            return False
+
+        # Assert orientation is ORIENTATION_CENTER, ORIENTATION_LEFT or ORIENTATION_RIGHT
+        if orientation not in [ORIENTATION_CENTER, ORIENTATION_LEFT, ORIENTATION_RIGHT]:
+            self.logger.error(f"Invalid orientation {orientation}")
+            return False
+
+        self.rotation = orientation
+
+        self.logger.info(f"URController set_orientation({orientation}) finished")
+
+        # Orientation set
         return True
 
 
@@ -257,22 +333,47 @@ if __name__ == "__main__":
     # Universal Robots controller
     ur_controller = URController()
 
-
-    
     # Test digital output
-    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=True)
     ur_controller.digital_out(pin=D_OUT_GRIPPER, value=False)
-    
+    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=True)
+
+    # Home the robot
     ur_controller.move_to_home()
-    
+
+    # Calibrate force sensor
     ur_controller.calibrate_force_sensor()
 
-    ur_controller.move_to_object(x=-0.5, y=-0.5)
-
+    # Test height
     ur_controller.move_height(z=0.13)
     ur_controller.move_height(z=0.25)
     ur_controller.move_height(z=0.13, force=3.0)
     ur_controller.move_height(z=0.25)
 
+    # Pick and place 0.3, 0.3
+    ur_controller.move_to_object(x=0.3, y=0.3)
+    ur_controller.move_height(z=0.095, force=3.0)
+    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=False)
+    ur_controller.move_height(z=0.25)
+    ur_controller.move_height(z=0.095, force=3.0)
+    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=True)
+    ur_controller.move_height(z=0.25)
 
+    # Pick and place 0.1, 0.5
+    ur_controller.move_to_object(x=0.1, y=0.5)
+    ur_controller.move_height(z=0.095, force=3.0)
+    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=False)
+    ur_controller.move_height(z=0.25)
+    ur_controller.move_height(z=0.095, force=3.0)
+    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=True)
+    ur_controller.move_height(z=0.25)
+
+    # Test orientation
+    ur_controller.set_orientation(ORIENTATION_LEFT)
+    ur_controller.move_to_object(x=0.1, y=0.5)
+    ur_controller.set_orientation(ORIENTATION_RIGHT)
+    ur_controller.move_to_object(x=0.1, y=0.5)
+    ur_controller.set_orientation(ORIENTATION_CENTER)
+    ur_controller.move_to_object(x=0.1, y=0.5)
+
+    # Return home
     ur_controller.move_to_home()
