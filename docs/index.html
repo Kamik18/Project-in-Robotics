@@ -1,37 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Index</title>
+    <title>Project</title>
 
     <!-- Meta -->
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Google Font -->
-    <link
-      href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="./css/theme.css" />
 
     <!-- Favicon -->
     <link rel="icon" href="./images/favicon.ico" type="image/x-icon" />
+
+    <!-- Font awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
   </head>
 
-  <body>
-    <main>
-      <h1> I'm a barbie gurl <<33 </h1>
-      <p>
-        This is the index page. It is the first page that is loaded when you
-        visit the website.
-      </p>
+  <body
+    class="docs-page"
+    data-bs-spy="scroll"
+    data-bs-target="#docs-nav"
+    data-bs-root-margin="-100px 0px -40%"
+  >
+    <header class="header fixed-top">
+      <div class="branding docs-branding">
+        <div class="container-fluid position-relative py-2">
+          <div class="docs-logo-wrapper gap-2 d-flex">
+            <button
+              id="docs-sidebar-toggler"
+              class="docs-sidebar-toggler docs-sidebar-visible d-xl-none"
+              type="button"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div class="site-logo">
+              <a class="navbar-brand" href="./project.html">
+                <span class="logo-text"
+                  >Master thesis <span class="text-alt">Doc</span></span
+                >
+              </a>
+              <a class="navbar-brand" href="./project.html">
+                <span class="text-alt logo-text"><strong>Project</strong></span>
+              </a>
+              <span class="badge bg-primary"></span>
+            </div>
+          </div>
 
-      <img
-        src="./images/sdu.png"
-        alt="University of Southern Denmark logo"
-        height="100px"
-      />
-    </main>
+          <div
+            class="docs-top-utilities d-flex justify-content-end align-items-center gap-3"
+          >
+            <button
+              type="button"
+              class="btn-changelog btn btn-primary d-none d-lg-flex"
+              data-bs-toggle="modal"
+              data-bs-target="#changelogModal"
+            >
+              Changelog
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="docs-wrapper">
+      <div id="docs-sidebar" class="docs-sidebar">
+        <nav id="docs-nav" class="docs-nav navbar">
+          <ul class="section-items list-unstyled nav flex-column pb-3">
+            <li class="nav-item section-title">
+              <a class="nav-link scrollto" href="#section-intro"
+                >Introduction</a
+              >
+              <ul class="nav flex-column mt-2 lvl2">
+                <li class="nav-item">
+                  <a class="nav-link scrollto" href="#item-intro-collab"
+                    >Collaboration
+                  </a>
+                </li>
+              </ul>
+            </li>
+
+            <li class="nav-item section-title">
+              <a class="nav-link scrollto" href="#section-pdf">Documents</a>
+              <ul class="nav flex-column mt-2 lvl2">
+                <li class="nav-item">
+                  <a class="nav-link scrollto" href="#item-pdf-report"
+                    >Report</a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link scrollto" href="#item-license-apache"
+                    >Apache license</a
+                  >
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="docs-content">
+        <div class="container">
+          <article class="docs-article" id="section-intro">
+            <header class="docs-header">
+              <h1 class="docs-heading">
+                Introduction
+                <span class="docs-time">last update: xx-xx-xxxx</span>
+              </h1>
+              <section class="docs-intro">
+                <p>TODO: Write about the project here.</p>
+
+                <img
+                  src="./images/sdu.png"
+                  alt="University of Southern Denmark logo"
+                  width="100%"
+                />
+
+                <p>TODO: Write about the project here.</p>
+              </section>
+            </header>
+
+            <hr />
+
+            <section class="docs-section" id="item-intro-collab">
+              <h2 class="section-heading">Collaboration</h2>
+              <p>
+                This thesis is made in collaboration with the University of
+                Southern Denmark (SDU) and ...
+              </p>
+
+              <p>SDU is providing support in the form of ...</p>
+
+              <p>
+                SDU
+                <a href="https://www.sdu.dk/en/forskning/sdu_biorobotics"
+                  >SDU Biorobotics</a
+                >
+              </p>
+              <img
+                src="./images/sdu.png"
+                alt="University of Southern Denmark logo"
+                height="100px"
+              />
+            </section>
+          </article>
+
+          <article class="docs-article" id="section-pdf">
+            <header class="docs-header">
+              <h1 class="docs-heading">Documents</h1>
+              <section class="docs-intro">
+                <p>TODO Write intro for this section here.</p>
+              </section>
+            </header>
+
+            <section class="docs-section" id="item-pdf-report">
+              <h2 class="section-heading">Report</h2>
+              <p>TODO Write intro for this section here.</p>
+
+              <br />
+              <br />
+              <iframe
+                src="./../latex/main.pdf"
+                style="width: 100%; height: 800px; pointer-events: fill"
+                frameborder="0"
+                type="application/pdf"
+              ></iframe>
+            </section>
+
+            <section class="docs-section" id="item-license-apache">
+              <h2 class="section-heading">Apache license</h2>
+              <div class="docs-code-block">
+                <pre class="shadow-lg rounded">
+                  <code class="language-json hljs">
+Copyright (<i class="fa fa-sharp fa-regular fa-copyright"></i>) 2023 Group 1
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+                  </code>
+                </pre>
+              </div>
+            </section>
+          </article>
+
+          <footer class="footer">
+            <div class="container text-center py-5">
+              <small class="copyright"
+                >Developed by
+                <a
+                  class="theme-link"
+                  href="https://github.com/Kamik18/Project-in-Robotics"
+                  target="_blank"
+                  >Group 1</a
+                >
+              </small>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </div>
+    <!--docs-wrapper-->
+
+    <!-- Changelog Modal -->
+    <div
+      class="modal fade"
+      id="changelogModal"
+      tabindex="-1"
+      aria-labelledby="changelogModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title px-3 py-1" id="changelogModalLabel">
+              Changelog
+            </h4>
+            <button
+              type="button"
+              class="btn-close p-4"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+
+          <div class="modal-body">
+            <changelog-component></changelog-component>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Scripts -->
     <script
@@ -44,5 +265,8 @@
       integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
       crossorigin="anonymous"
     ></script>
+
+    <script src="./js/constants.js"></script>
+    <script src="./js/site.js"></script>
   </body>
 </html>
