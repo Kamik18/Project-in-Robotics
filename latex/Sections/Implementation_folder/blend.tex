@@ -1,0 +1,139 @@
+\documentclass[Setup/main.tex]{subfiles}
+\begin{document}
+\subsection{Blend of several skills}\label{sec::blend}
+The blend operation serves the purpose of smoothing out the movement trajectory, eliminating abrupt changes, and improving the overall path optimization. This smoothness not only enhances the top speed and acceleration but also allows for longer paths.
+
+\subsection{Trajectory blending with Parabolic blend}
+The method used for blending the skills is a parabolic blend. The main method used is from Github \cite{para_blend} with changes to utilize it for this project. This method works for one-dimensional trajectories and smoothens the trajectory between two or more points, making the trajectory continuous.
+
+To implement the method, the approach has been to import two trajectories from which three or more points are extracted for the blend. If two trajectories meet at the same configuration, three points are used but if two trajectories do not meet at the same configuration, an extra point is added to create the trajectory between the last configuration in the first trajectory and the first configuration in the second trajectory. 
+
+Between all points, a linear trajectory is created, and for each point, a parabolic blend is created between the points. With this method, achieving blends without two trajectories meeting in the same configuration is possible and reduces the number of trajectory creations required.
+
+For the linear segments, the speed is constant and calculated as
+\begin{equation}
+    v_i = \frac{q_{i+1} - q_i}{\Delta T_i}
+\end{equation}
+
+where $q_{i+1}$ and $q_i$ are waypoints, and $\Delta T_i$ is the time between the points.
+
+In the blend phases at the waypoints, the linear segments are replaced with a parabola that follows a constant acceleration.
+\begin{equation}
+    a_i = \frac{v_i - v_{i-1}}{t^b_i} 
+\end{equation} 
+
+where $v_i$ and $v_{i-1}$ are velocities at each waypoint and $t^b_i$ is the duration of the blend phase at waypoint $i$.
+
+The parabolic blend is given by
+\begin{equation}
+    b(t) = b_0 + \Dot{b}_0t + \frac{1}{2}at^2
+\end{equation}
+
+where $b_0$ is the position for the start of the blend, $\Dot{b}_0$ is the velocity at the start of the blend and $a$ is the constant acceleration during the blend.
+For a blend around a waypoint $i$, these are given as 
+
+\begin{align}
+    b_0 &= q_i - v_{i-1}\frac{t^b_i}{2} \\
+    \Dot{b}_0 &= v_{i-1}\\
+    a &= a_i
+\end{align}
+
+The one-dimensional trajectory in figure \ref{fig:Lin_seg_w_para_blend} displays both the original path with waypoints using linear segments between each point and the blended path showing where the blending starts and ends for each point using a parabolic blend \cite{path_to_traj}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{Tables and Images/Blend/Lin_seg_w_para_blend.png}
+    \caption{One-dimensional Linear Segment with Parabolic Blends for 4 of 5 points}
+    \label{fig:Lin_seg_w_para_blend}
+\end{figure}
+
+Since the method provides a generic method for one-dimensional path smoothing, the robot poses used are joint angles for each joint. 
+
+The parabolic blend method is used in two ways in the project. The paths taken are divided into segments at each step, where it reaches object A or object B. In figure \ref{fig:completepath} two images are shown. Both display the trajectories as dots of the robot with a different color for each segment used. Note that for figure \ref{fig:completepath_op} the number of segments has decreased and the paths are smoothened with blends compared to figure \ref{fig:completepath_noop}.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.8\linewidth}
+    \includegraphics[width=\linewidth]{Tables and Images/Blend/completePath.png}
+    \caption{Complete path without optimization}
+        \label{fig:completepath_noop}
+  \end{subfigure}
+  \par
+  \begin{subfigure}[b]{0.8\linewidth}
+    \includegraphics[width=\linewidth]{Tables and Images/Blend/completePath-optimized.png}
+    \caption{Complete path with optimization}
+    \label{fig:completepath_op}
+  \end{subfigure}
+  \caption{Differences between the optimized path and the original path}
+  \label{fig:completepath}
+\end{figure}
+
+Figure \ref{fig:blend_b_to_as} shows a blend between two paths that a not connected at a single point. For each axis for the translation and the rotation in axis-angles, it shows the position and the waypoints that it has to follow. Due to changes in the length of the trajectories, the standard length in which the method selects the start and end blend position is set to 20 steps. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Tables and Images/Blend/Blend_pick_insert_tcp.png}
+    \caption{Blend from point B to Point A - the stars are the waypoints and the lines is the parabolic blend}
+    \label{fig:blend_b_to_as}
+\end{figure}    
+
+\subsubsection{Skill blending using GMR tolerances} \label{sec:blend:gmr}
+This section describes the optimization used by GMR to smoothen the transition from one skill to another when they are closely fitted together. From the LfD there are some small offsets in some of the joints that are unwanted, and with the covariances from the GMR, it is possible to reduce this high acceleration movement between skills.
+
+With the GMR, described in section \ref{sec:GMM}, the covariances are used to reduce the distance between the current position and the next, if the distance between the points is larger than the covariance. If the distance is too large, the current configuration is adjusted by the maximum covariance distance allowed. An example can be seen in figure \ref{fig:GMR_cov_opti_up_a} and figure \ref{fig:GMR_cov_opti_up_b}. Both figures display three columns, the left column is the path of the trajectory that is modified. It shows both the trajectory before and after applying the covariance optimization. In the middle column, the original two trajectories are plotted, and the gap between them is where one trajectory ends and the other begins. In the right column, both trajectories are plotted with the optimized points where it is obvious to see that the transition between the skills is blended to reduce the large acceleration. 
+
+For the difference in the two trajectories in the left column, the reason is that during the normal iteration of the trajectory, the points all lie within the covariance, and here to algorithm reduces the distance for all points afterward. Therefore they receive a slight displacement. This is an effect of the optimization method that corrects the rest of the trajectory.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Tables and Images/Blend/GMR_cov_opti_up_b.png}
+    \caption{GMR gap optimization between the insert and retract for picking at object B. $j0\_bf$ is the path before optimization and $j0\_af$ is the path after optimization.}
+    \label{fig:GMR_cov_opti_up_b}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Tables and Images/Blend/GMR_cov_opti_up_a.png}
+    \caption{GMR gap optimization between insert and retract for picking at object A. $j0\_bf$ is the path before optimization and $j0\_af$ is the path after optimization.}
+    \label{fig:GMR_cov_opti_up_a}
+\end{figure}
+
+\newpage
+\subsection{Skill blending using quadratic programming optimization} \label{sec:blend:qp}
+For quadratic programming (QP), the implementation is created using the \texttt{Python} library \texttt{cvxpy}. The method takes in two configurations of the robot pose, which can be either the joint values or the translation and axis-angles. Both of these are a vector of six values, which then can be put into the \texttt{np.linalg.norm()} function. This function computes the norm (magnitude or length) of a vector. By subtracting configuration 1 from configuration 2, the vector representing the displacement between the two points can be obtained. Taking the norm of this displacement vector gives the Euclidean distance between the two points in the same space.
+
+The distance between the points determines the number of waypoints that the QP will generate. The Euclidian distance is a singular value, and a predetermined value of 0.01 is chosen as the division factor to calculate the required number of waypoints. Note that here the waypoints are the positions that the robot reaches at each step in between the two configurations. 
+
+The QP is a mathematical optimization problem that aims to minimize a quadratic objective function that is constrained to be affine. The general form is expressed as:
+
+\begin{align}
+    \text{minimize} \quad &\frac{1}{2}x^T Px + q^Tx +r \notag \\
+    \text{subject to} \quad &Gx \preceq h \\
+    &Ax = b \notag 
+\end{align}
+
+where $x$ is the optimization variable as a vector. The objective function consists of three terms: the quadratic term: $\frac{1}{2}x^T Px$, the linear term $q^Tx$ and the constant term $r$. The matrix $P \in S^n_+$ determines the quadratic relationship between variables, and $q$ and $r$ are vectors that define the linear and constant components, respectively.
+
+The constraints are expressed in the form of linear or affine inequalities $Gx \preceq h$, where $G \in \boldsymbol{R}^{m \times n}$ is a matrix and $h$ is a vector. These inequalities restrict the feasible solutions. Additionally, there can be equality constraints of the form $Ax=b$, where $A \in \boldsymbol{R}^{p \times n}$. $m$ is the number of inequality constraints, $p$ is the number of equality constraints, and $n$ is the number of decision variables, which is the six joint values \cite{cvxbook}. 
+
+In this case, the QP uses upper and lower bounds as the joint limits of the UR5e, with no inequality constraints and equality constraints as the start and end joint configuration.
+
+In figures \ref{fig:QP_opti_up_b} and \ref{fig:QP_opti_up_a} the QP combined with the two trajectories are shown. In this method, the original trajectory does not change as seen in the left column of both figures. Here the red dots are barely visible since all the blue dots cover these. The entire path is then unchanged and will be kept as it is created by the trajectory control methods, such as DMP or GMR. The QP steps are added in between the two trajectories, making the entire duration of the movement longer by the number of waypoints added.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Tables and Images/Blend/QP_opti_up_b.png}
+    \caption{QP gap optimization between the pick and place at object B}
+    \label{fig:QP_opti_up_b}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Tables and Images/Blend/QP_opti_up_a.png}
+    \caption{QP gap optimization between insert and retract at object A}
+    \label{fig:QP_opti_up_a}
+\end{figure}
+
+\end{document}
+
+

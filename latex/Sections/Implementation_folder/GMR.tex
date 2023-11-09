@@ -1,0 +1,114 @@
+\subsubsection{Gaussian Mixture Regression}\label{sec:GMM}
+The GMM is a probabilistic model that represents the probability distribution of a data set.
+This probability distribution is weighted and put into clusters of Gaussian mixture components representing the data.
+This can be seen in figure \ref{fig:GMR:covariance}, where eight clusters are created from the demonstration. 
+These clusters can then be used for GMR to create a path as seen in the figure, with the uncertainty.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\linewidth]{Tables and Images/GMR/covariance.pdf}
+    \caption{GMM representation of the data set for inserting an object into object A.}
+    \label{fig:GMR:covariance}
+\end{figure}
+
+The GMM is defined by data points denoted as $\xi_j$, which represents a single observation in the data set\cite{SelfStudy}[p.47-49]. Where the conditional probability of a data point $\xi_j$ given a component $k$, is denoted as $p(\xi_j | k)$.
+
+The mixture model gives the overall distribution of $\xi_j$, and the equation is seen in equation \ref{eq:GMR:MM}. The equation calculates the sum of probabilities of $\xi_j$ belonging to the component $k$, weighted by the probability of component $p(k)$. This gives $p(\xi_j)$ which is the probability of observing $\xi_j$ in the data set. 
+
+
+\begin{align}
+    p(\xi_j) &= \sum_{k=1}^{K} p(k) ~ p(\xi_j | k) \label{eq:GMR:MM}
+\end{align}
+
+\vspace{1em}
+
+In the Gaussian Model, the $p(\xi_j | k)$ is calculated using the Gaussian probability 
+density function (PDF). 
+
+In equation \ref{eq:GMR:GM}, the component $k$'s relative contribution to the overall mixture is calculated. The probability of component $p(k)$ in the mixture model is denoted as $\pi_k$, while $\mu_k$ and $\Sigma_k$ denote the mean vector and covariance matrix for the component $k$.
+
+\begin{align}
+    p(\xi_j | k) &= \mathcal{N} \left( \xi_{j}; \mu_{k}, \Sigma_k \right) \notag \\
+    &= \frac{1}{\sqrt{(2\pi)^D \left\lvert \Sigma_k \right\rvert}} e^{-\frac{1}{2}\left( (\xi_j - \mu_k)^T \Sigma_{k}^{-1} (\xi_j - \mu_k) \right)} \label{eq:GMR:GM}
+\end{align}
+
+The Gaussian model assumes the data within each component to be normally distributed. Furthermore, it uses the Mahalanobis distance to measure the dissimilarity between the data point and the mean of the component in the feature space.
+This allows the GMM to effectively model the distribution of the entire data set, and capture complex data structures, and identify underlying patterns in the data.
+GMM is suitable for complex tasks as demonstrated in this project, where a skill is learned by demonstrations. 
+The GMM estimates a path from the demonstrations, which can simplify the task of reducing the noise or the requirement for one perfect demonstration. This is because the path can be smoothened out to be within the variances which are visualized in figure \ref{fig:GMR:covariance}. This highlights one of the benefits of using a probabilistic model for LfD.
+
+The estimation of GMM is done through the following 3 steps:
+\begin{enumerate}
+    \item Decide on the number of mixture components
+    \item K-means clustering
+    \item Expectation Maximization (EM) Algorithm
+    \begin{itemize}
+        \item Expectation (E) Step
+        \item Maximization (M) Step
+    \end{itemize} 
+\end{enumerate}
+
+The GMM output is used for the GMR, which is a regression technique that adds regression analysis to the GMM. It estimates the output variables with covariance.
+GMR combines the flexibility of GMM in capturing complex data distributions, with the regression analysis making GMR a flexible and robust approach to regression problems. Regardless if the data is heterogeneous or multimodality.
+
+To find the expected spatial value and covariance, GMM joint probability distribution is calculated by equation \ref{eq:GMR:JPD}.
+
+\begin{equation}
+    \mathcal{P} (\xi_t, \xi_s): \begin{bmatrix}
+                                    \xi_t \\
+                                    \xi_s
+                                \end{bmatrix} ~ \sum_{k=1}^{K} \pi_k \mathcal{N} (\mu_k, \Sigma_k)
+    \label{eq:GMR:JPD}
+\end{equation}
+
+Where $\mu_k$ and $\Sigma_k$ are defined by separate temporal $t$, and spatial $s$ components:
+\begin{align}
+    \mu_k &= \left\{ \mu_{t, k}, \mu_{s, k} \right\} \\
+    \Sigma_k &= \begin{pmatrix}
+                    \Sigma_{t,k} & \Sigma_{ts,k} \\
+                    \Sigma_{st,k} & \Sigma_{s,k}
+                \end{pmatrix}
+\end{align}
+
+This gives the output for the GMR\cite{SelfStudy}[p.52], which is the expected spatial value and covariance, as seen in equation \ref{eq:GMR:hat_xi} and \ref{eq:GMR:hat_sigma}.
+
+\begin{align}
+    \hat{\xi}_s &= \sum_{k=1}^{K} \beta_k \hat{\xi}_s, k \label{eq:GMR:hat_xi} \\
+    \hat{\Sigma}_s &= \sum_{k=1}^{K} \beta_k^2 \hat{\Sigma}_s, k \label{eq:GMR:hat_sigma}
+\end{align}
+
+Where $\beta_k$ is the probability component $k$ that is responsible for the time, $\xi_t$.
+The conditional spatial expectation for a given time based on the mean and covariance is denoted by $\hat{\xi}_{s,k}$. It uses the deviation of $\xi_t$ from its mean $\mu_{t,k}$ and utilizes the covariance relationship between $\xi$ for $s,k$ and $t,k$.
+$\hat{\Sigma}_{s,k}$ is the adjusted covariance for a given time. It uses the original covariance matrix $\hat{\Sigma}_{s,k}$. 
+
+\begin{align}
+    \beta_k &= \frac{\mathcal{P} (\xi_t | k)}{\sum_{i=1}^{K} \mathcal{P} (\xi_t | i)} \\
+    \hat{\xi}_{s,k} &= \mu_{s,k} + \Sigma_{st,k} (\Sigma_{t,k})^{-1} (\xi_t - \mu_{t,k}) \\
+    \hat{\Sigma}_{s,k} &= \Sigma_{s,k} - \Sigma_{st,k} (\Sigma_{t,k})^{-1}  \Sigma_{ts,k}
+\end{align}
+
+In figure \ref{fig:GMR:cartesian2D}, the measurements for the orientation and translation in cartesian space, as well as the path found using this method. 
+This figure shows the uncertainty for each DoF during the LfD. It can be noticed that the tolerances must be higher for some DoF.
+Looking at the translational z-axis, the robot starts in a high position and ends low next to the table, with little variation on both ends.
+Whereas the y orientation starts with a specific orientation, but has a high variance during the insertion section at the end.
+These graphs show which axis must be precise, and which can accept some variation. 
+This information is later used for blending where it reduces the error to be blended, and subsequently provides a smother blend.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=\linewidth]{Tables and Images/GMR/path2d.pdf}
+    \caption{Visualization for orientation and translation}
+    \label{fig:GMR:cartesian2D}
+\end{figure}
+
+A 3D visualization of the translational path in figure \ref{fig:GMR:cartesian2D} is seen in figure \ref{fig:GMR:clearance}.
+This shows an ellipsis for each point on the GMR path. These ellipses show the tolerances at those points.
+These cone-shaped tolerances around the GMR path, show the path which must be followed.
+Visualizing some of the benefits of using a probabilistic model to model the demonstrations.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Tables and Images/GMR/path.pdf}
+    \caption{3D visualization with uncertainty}
+    \label{fig:GMR:clearance}
+\end{figure}

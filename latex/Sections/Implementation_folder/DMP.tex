@@ -1,0 +1,62 @@
+\subsubsection{Dynamic Movement Primitives}\label{sec::DMP}
+The DMP \cite{SelfStudy} is developed to capture the fundamental dynamics of a motion, including the movement path of a robot's arm and the necessary forces to manipulate it. The DMP represents the movement as a second-order system, specifically a spring-mass-damper system and some force term. Equation \ref{eq:dmp:dmp_eq} refers to this system and describes the dynamics of the DMP.
+
+\begin{align}
+    \tau \Dot{z} &= \alpha_y(\beta_y(g-y) - z) + f(x) \notag \\
+    \tau \Dot{y} &= z
+    \label{eq:dmp:dmp_eq}
+\end{align}
+
+Where $\tau$ is a time constant that controls the duration of the trajectory, which makes it possible to speed or slow the trajectory down.
+The DMP is built up around a second-order system represented by a spring-mass-damper system as follows. 
+
+\begin{align*}
+    \Dot{z} &= \alpha_y(\beta_y(g-y) - z)\\
+    \Dot{y} &= z
+\end{align*}
+
+The values of $ \alpha_y $ and $ \beta_y$ are both positive constants that are carefully selected to ensure that the system is critically-damped. A common guideline for choosing these parameters is to set $ \beta_y$ equal to one-fourth of $ \alpha_y $.
+
+The force term in equation \ref{eq:dmp:dmp_eq}, works to approximate any given trajectory(set of force changes over time that shapes the trajectory). The force term is represented as a weighted mixture of Gaussian basis functions
+
+\begin{align}
+    f(x) &= \frac{\sum_N^{i=1} w_i \phi_i(x)}{\sum_N^{i=1} \phi_i(x)} x(g-y_0)
+    \label{eq:dmo:force_func}
+\end{align}
+
+Each $\phi_i(x)$ is a Gaussian function and $N$ is the number of weighted functions. These basis functions are combined in a weighted sum to produce a smooth and continuous trajectory that can be used to guide the movement of a robotic arm or other types of system. Generating a trajectory with a higher number of basis functions $N$ results in a more intricate trajectory, while a lower number of basis functions produces a smoother trajectory. 
+
+Looking at equation \ref{eq:dmo:force_func} the force term depends on $x$ rather than time. $x$ is called the phase of the system and it is defined as first-order exponential decay as seen in equation \ref{eq:dmp:phase_func}:
+
+\begin{align}
+    \tau \Dot{x} = -\alpha x
+\label{eq:dmp:phase_func}
+\end{align}
+
+The phase term in the DMP ensures that the movement converges to a position close to zero at the end of the motion. This causes the force term to become zero at the end of the motion, leaving the system with a spring-mass-damper system that ensures convergence to a goal position regardless of external factors. Therefore, the DMP is capable of reaching a goal position at the end of a motion, and one of its key properties is that it is time-independent, making the system autonomous. The DMP is also robust to disturbance, making it an effective technique for responsive movements in dynamic environments. Finally, the DMP requires only a single demonstration to learn the desired trajectory. The DMP can not be better than the demonstration, but it can be as good as the demonstration.
+
+However, implementing the DMP is possible for both joint space and cartesian space. There are some parameters that need to be tuned like $\alpha_y$, $\beta_y$, $\alpha$, $\tau$, and number of basis function $N$.
+In this project, a smooth trajectory is deemed necessary rather than a faster or slower one. Thus, the value of $\tau$ is equivalent to the time of the demo training trajectory. To ensure that the spring-mass-damper system is critically damped, $\alpha_y $ is set to $48.0$, and $\beta_y$ is set to $12.0$. The value of $\alpha$ in equation \ref {eq:dmp:phase_func} is chosen to be $-\ln{0.01}$, resulting in a phase system coverage of $99\% $ when $t=\tau$. To achieve a smoother trajectory, the number of Gaussian basis functions $N$ is selected to be 10.
+
+However, the training and generated trajectory using the DMP in Cartesian space is depicted in figure \ref{fig:Adm:dmp_both}. 
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{Tables and Images/Imlementing_fig/position_dmp.pdf}
+    \caption{Position of DMP for generating extract skills.}
+    \label{fig:impl:dmp:pos}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.45\linewidth}
+     \includegraphics[width=\linewidth]{Tables and Images/Imlementing_fig/rotation_dmp.pdf}
+    \caption{Orientation of DMP for generating extract skills.}
+    \label{fig:impl:dmp:ori}
+  \end{subfigure}
+  \caption{DMP versus DEMO for skill Down A.}
+  \label{fig:Adm:dmp_both}
+\end{figure}
+\newpage
+
+The aim is to achieve a smoother trajectory obtained as seen in the two figures \ref{fig:impl:dmp:pos} and \ref{fig:impl:dmp:ori}. 
+However, if the value of $N$ exceeds 10, the trajectory obtained is identical to the demonstration, while a value lower than 10 leads to oscillation and an imprecise path. Thus, for this particular application, $N$ equals 10 is the most suitable option.

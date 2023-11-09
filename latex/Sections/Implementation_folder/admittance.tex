@@ -1,0 +1,104 @@
+\subsection{Admittance Control} \label{sec::admittance} 
+In this project, a UR5e robot is provided to achieve the desired objective of the project. The robot has a freedrive option that employs an impedance controller. However, operating the robot can be difficult due to its stiffness, particularly in situations where high precision is required. Unfortunately, Universal Robots does not provide any access to the impedance controller which means that there is no way to adjust its parameters in order to reduce its stiffness. Hence, it is essential to have admittance control, a technique that enables the movement of a cooperative robot to be controlled by applying an external force. 
+
+Figure \ref{fig:impl:Adm:Admittance_control} shows an overview of how the admittance controller works. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{Tables and Images/Imlementing_fig/admittance.pdf}
+    \vspace{-15mm}
+    \caption{Admittance control.}
+    \label{fig:impl:Adm:Admittance_control}
+\end{figure}
+
+On top of motion control, admittance control is applied. It requires a reference position and input from a force sensor from the robot. Hence, it should be emphasized that motion control is not being implemented in this project as the UR5e already provided it. 
+
+However, in the admittance control, the robot works as a spring-mass-damper system. Where the mass represents the robot's inertia, the spring represents the robot's stiffness, and the damper represents the robot's damping effect. 
+
+\begin{equation}
+M_p\Delta\ddot{p}_{cd}+D_p\Delta\dot{p}_{cd}+K_p\Delta p_{cd} = f  
+\label{eq:impl:admitance_transl_eq}
+\end{equation}
+
+Equation \ref{eq:impl:admitance_transl_eq} represents the transnational part of the admittance controller. 
+Where:
+\begin{itemize}
+    \item $M_p$ is a $3\times3$ gain matrix, representing the inertia  of the robot.
+    \item $D_p$ is a $3\times3$ gain matrix, representing the damping effect of the robot.
+    \item $K_p$ is a $3\times3$ gain matrix, representing the robot's stiffness.
+    \item $\Delta p_{cd}$ is the difference in position between the compliant frame and reference frame.
+    \item $\Delta\dot{p}_{cd}$ is the difference in velocity between the compliant frame and reference frame.
+    \item $\Delta\ddot{p}_{cd}$ is the difference in acceleration between the compliant frame and reference frame.
+    \item $f\in\mathds{R}^3$ is the force given in the tool frame.
+\end{itemize}
+
+A decent $D_p$ and $K_p$ gain matrix are selected to achieve desired performance. $K_p = eye(10)$, $D_p = eye(25)$. 
+With $K_p$ and $D_p$, the gain matrix $M_p$ can be computed by the following formula.
+\begin{align}
+    M_p &= \frac{K_p}{\omega} \label{eq:impl:M_p}
+\end{align}
+
+where $\omega = \frac{1}{t_r}$ [Hz], $\omega$ is the natural frequency and $t_r$ is the raising time [s], which is selected to be $1.0$ [s]. 
+
+The orientational part also employs the admittance control which operates based on the same principle as the spring-mass-damper system.
+The orientational component of the admittance controller is demonstrated in equation \ref{eq:impl_admit_rot}.
+
+\begin{equation}
+M_o\Delta\dot{\omega}_{cd}^d+D_p\Delta{\omega}_{cd}^d+K_o' \epsilon_{cd}^d = \mu^d
+    \label{eq:impl_admit_rot}
+\end{equation}
+
+Where:
+\begin{itemize}
+    \item $M_o$ is a $3\times3$ gain matrix, representing the inertia  of the robot. Equation \ref{eq:impl:M_p} is used to calculate the $M_o$ where $t_r$ is selected to be $0.9$ [s].
+    \item $D_o$ is a $3\times3$ gain matrix, representing the damping effect of the robot. $D_o$ is selected to be $eye(0.5)$.
+    \item $K_o'$ is a $3\times3$ gain matrix, representing the rotational stiffness of the robot. The stiffness matrix is given as follows $K_o' = 2E^T((\eta_{cd}, \epsilon_{cd}^d)) K_o$, where $K_o$ is the stiffness in Euler angle representation and $E(\eta , \epsilon) = \eta I - S(\epsilon)$. Where $K_o$ is selected to be $eye(0.1)$.
+
+    \item $\Delta{\epsilon}_{cd}^d$ is the imaginary part of the quaternion between the  compliant frame and reference frame. It is obtained as follows ${\epsilon}_{cd}^d = \eta_d \epsilon_c - \epsilon_c \eta_d -S(\epsilon_c) \epsilon_d$
+    
+    \item $\Delta\dot{p}_{cd}$ is the difference in angular velocity between the compliant frame and reference frame.
+    \item $\Delta\ddot{p}_{cd}$ is the difference in angular acceleration between the compliant frame and reference frame.
+    \item $\mu^d\in\mathds{R}^3$ is the torque to the end effector given in the desired frame.
+\end{itemize}
+
+The above equation \ref{eq:impl_admit_rot} uses quaternion as a representation of the rotation due to the ability to prevent singularities. To acquire the quaternion, angular velocity can be integrated, as demonstrated in the equation. \ref{eq:iml:quat}.
+
+\begin{align}
+q(t+dt) &= exp\left( \frac{dt}{2}\omega_{cd}^d(t+dt) \right) \cdot q(t)
+\label{eq:iml:quat}
+\end{align}
+Where
+$$exp(r) = (\eta,~\epsilon) = \left(cos ||r||,~\frac{r}{||r||}sin||r||\right)$$
+
+$exp(r)$ is the exponential map of the quaternion. 
+The admittance control for the translation and rotation work separately and they are used to record a demonstration of the desired trajectory. 
+The two video recordings, \cite{github-FreeDrive} and \cite{github-Admittance}, demonstrate a comparison between the performance of the admittance control and impedance control (freedrive). It is obvious that the admittance control is easier to operate than the impedance control as it is less stiff and more precise.
+
+\subsubsection{Filter}
+
+The admittance control is operating with data from a six-degree-of-freedom (DoF) force torque sensor. 
+This sensor provides the forces and torques from the tool in the base frame. However, this sensor has a lot of noise in all six DoF. 
+In the translational, it receives error forces up $\pm 2$ [N]. 
+This causes the admittance control to behave differently than anticipated, and if the robot is left in an unsupported position after a demonstration, it will begin to wander.
+
+Because of this, a filter is applied to the force toque sensor before being used in the admittance control, and the improvement is visualized in figure \ref{fig:Adm:filter}.
+
+\begin{figure}[!htb]
+  \centering
+  \begin{subfigure}[b]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{Tables and Images/Imlementing_fig/Filter_F.pdf}
+    \caption{Translational component.}
+    \label{fig:Adm:filter_translation}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.45\linewidth}
+    \includegraphics[width=\linewidth]{Tables and Images/Imlementing_fig/Filter_W.pdf}
+    \caption{Oriention component.}
+    \label{fig:Adm:filter_rotation}
+  \end{subfigure}
+  \caption{Visualization of the force torque sensor with and without a filter.}
+  \label{fig:Adm:filter}
+\end{figure}
+
+The filter is simple and uses the $f(x) = log(x)$, where values less than 1 are set to 0. The axis is scaled appropriately to reduce forces greater than the threshold of $x > 1$ after scaling and removing forces $x \leq 1$. The is then scaled back to normal, and these changes can be observed in figure \ref{fig:Adm:filter}. 
+Using this filter makes controlling the robot smoother and easier, and the robot TCP will stay in the unsupported position where it is left.

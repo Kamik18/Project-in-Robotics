@@ -1,0 +1,24 @@
+\documentclass[Setup/main.tex]{subfiles}
+
+\pagenumbering{Roman}
+\setcounter{page}{1}
+\rfoot{
+    \vspace{2 mm}
+    Page \thepage \hspace{1pt} of \Romannum{2}
+}
+\renewcommand{\abstractname}{}    % clear the title
+
+\begin{document}
+\section*{Abstract}      
+
+
+
+\hspace{10pt}
+% Keywords command
+
+\providecommand{\keywords}[1] {
+  \small	
+  \textbf{\textit{Keywords: }} #1
+}
+\keywords{Simulation, admittance control, Trajectory Control, Blend of Several Robot skills.}
+\end{document}

@@ -1,0 +1,27 @@
+\documentclass[Setup/main.tex]{subfiles}
+\begin{document}
+\section{Implementation}
+
+\subsection{Robot Program**}
+
+Hydrovertic Systems' advanced robot programming is a key factor that sets it apart in commercial gardening. The programming enables precise movement and coordination of the robotic arm, ensuring accurate and efficient transfer of plants from modular blocks to individual cups. A critical component of the system is the use of homography, which allows for the mapping of the table's coordinate system to the robot's coordinate system and vice versa.
+
+Homography, in this context, serves as the bridge between the table where the modular blocks are located and the robot's workspace. It allows for the translation of positions from one coordinate system to another. This is essential because the positions of the plants in the modular blocks are specified with respect to the table's coordinate system, while the robotic arm operates in its own coordinate system. Homography ensures seamless communication and coordination between the two.
+
+In the process of moving plants from the modular blocks to the cups, the system needs to know the precise locations of the plants on the table. The homography mapping function takes the known positions of the plants on the table and translates them into coordinates that the robot arm can understand and act upon. This ensures that the robot arm accurately picks up plants from the modular blocks.
+
+Conversely, when moving the robot arm to a specific position in the table's coordinate system, the system employs homography to convert these coordinates into robot-friendly coordinates. This step is important in the robot's movement towards the target position, guaranteeing that the plant is placed in the desired cup with precision and care with respect to the table coordinate. 
+
+The openCV homography function is used in this project to establish a mapping between the table and robot coordinates, and vice versa. This function requires four sets of points: the table coordinates and robot coordinates at those points.
+
+In the HydroverticSystems project, seamless and efficient automation is achieved through the utilization of the URTDE library, a critical component that empowers the system to communicate with and control the robotic arm. 
+
+
+To accomplish the goal of moving the robotic arm to any specific (x, y, z) point, custom movement functions have been meticulously developed. These functions are the cornerstone of HydroverticSystems' ability to operate with precision. 
+
+In addition to custom movement functions, the HydroverticSystems project incorporates three predefined rotations designed to align perfectly with the gripper solution. These predefined rotations provide a standardized orientation for the robotic arm, ensuring that the gripper approaches the plants in the most efficient and effective manner. This standardization not only simplifies the programming but also guarantees the consistent and accurate handling of each plant.
+
+
+Finally, Safety is of paramount importance in any automation system, and HydroverticSystems is no exception. To maintain the safety of both the robotic arm and the surrounding environment, the project defines safe workspaces within which the robot operates. These predefined workspaces ensure that the robot's movements are confined to well-defined areas, preventing any unwanted interference or collisions. 
+
+\end{document}

@@ -1,0 +1,20 @@
+\subsection{Selecting skills}\label{sec::skills} 
+Two objects are used to create the demonstrations, see the green object in figure \ref{fig:skills:objects}. These objects are mounted differently on the table, and a cylinder is created to fit in the holes of the objects, the red cylinder in figure \ref{fig:skills:objects}.
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Tables and Images/Object/2D.png}
+    \caption{The object, green, and the cylinder to be inserted and extracted, red.}
+    \label{fig:skills:objects}
+\end{figure}
+
+Object A is placed on the side of the table, where the robot places a cylinder in the hole of the object and extracts it again. 
+This creates two skills, where the first skill is insertion and the second is extraction. During these skills, the gripper will stay closed holding the cylinder.
+These skills are chosen to evaluate how well the DMP and GMR algorithms could handle translation and orientation, which are necessary to perform these skills. This has some challenging aspects because the robot does not provide quaternions, but instead an axis-angle. These skills would therefore exploit the issues when an angle change sign.
+
+Object B is placed on the top of the table, and does not require any orientational movement. 
+At this object, 2 skills are created, in the form of a pick-and-place skill. The pick is relatively easy since it will grab around the object and move along the z-axis till the cylinder is free from the object. Furthermore, the gripper closes around the object once it reaches the position, and movement in the gripper is possible. A pick can therefore accept some movement. However, a pick offset from the center of the cylinder will cause an issue for the other skills when inserting the cylinder into the objects. The place skill requires higher precision to get the cylinder into the object before opening the gripper.
+These skills at object B differed from the skills at object A by the orientational part, and how precise the skills have to be.
+
+All skills, as seen in the videos \cite{github-Skill-B_down}, \cite{github-Skill-A_down}, \cite{github-Skill-A_UP}, and \cite{github-Skill-B_UP}, are demonstrated 25 times due to the GMR, and the demonstrations are done slowly to ensure a smooth and controlled movement. Around the holes of the objects, the movement where slower due to the constraints, and the demonstrations have to be very precise at these locations. 
+The four distinct skills are recorded using the admittance control discussed in section \ref{sec::admittance}.

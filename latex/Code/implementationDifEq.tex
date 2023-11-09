@@ -1,0 +1,22 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\begin{lstlisting}[style=Matlab]
+dt = 0.1    % sample time
+t  = 0:dt:14;   % time vektore
+u = ones(size(t)); u(1) = 0;    % step input
+du(1) = 0;  % initial value 0 and time 
+y(1) = 0; 
+dy(1) = 0; 
+ddy(1) = 0;
+for i = 2:length(t);    % controller loop
+    du(i) = (u(i)-u(i-1)) / dt;
+    dy(i) = dy(i-1) + dt*ddy(i-1);
+     y(i) = y(i-1) + dt*dy(i-1);
+   ddy(i) = du(i) + 5*u(i) -2*dy(i) -4*y(i);   
+end
+scatter(t,y,3)  % scatter plot
+\end{lstlisting}
+
+\end{document}

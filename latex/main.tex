@@ -1,0 +1,162 @@
+\documentclass[11pt]{article}
+\renewcommand{\baselinestretch}{1.5}
+
+% Use-packages:
+\usepackage{amsthm,latexsym,amssymb,amsmath, amsfonts}
+\usepackage{adjustbox}
+\usepackage[english]{babel}
+\usepackage{bm}
+\usepackage[format=hang,font={small,it},labelfont=bf]{caption}
+    \captionsetup{compatibility=false} % pga subcaption
+\usepackage{enumitem}
+    \renewcommand{\labelitemii}{$\bullet$}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{gensymb}
+\usepackage[a4paper, top=2.81cm, bottom=3.75cm, outer=2.5cm, inner=3.5cm, footskip=2cm]{geometry}
+    \setlength{\parindent}{0pt} % Remove tab
+\usepackage{graphicx} % resizebox 
+\usepackage[utf8]{inputenc}
+\usepackage{lastpage}
+\usepackage{lipsum}
+\usepackage{romannum}
+\usepackage{subcaption}
+\usepackage{subfiles}
+\usepackage{textcomp}
+\usepackage{tikz}
+    \usetikzlibrary{decorations.pathreplacing}
+    \usetikzlibrary{arrows.meta}
+    \usetikzlibrary{shadings}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{wrapfig}
+\usepackage{amsmath,amsthm}
+ \usepackage{amssymb}
+\usepackage{dsfont}                         % Enables double stroke fonts
+\usepackage{color}
+
+\usepackage{float}
+\usepackage{bm}
+\usepackage{tcolorbox}
+\newcommand{\vek}[1]{\bm{#1}}        % Typography for vector
+\newcommand{\tn}[1]{\textnormal{#1}}        % Wrapper for \textnormal
+\usepackage{pgfplots}
+\usepackage{bigints}
+\usepackage[skip=10pt plus1pt, indent=0pt]{parskip}
+
+\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+    
+\usepackage{listings}
+
+
+
+% Warning - Load last
+\iftrue % iffalse: With boxes, iftrue: Hide boxes
+    \usepackage[hidelinks]{hyperref} % Hide boxes around hyper references
+\else
+    \usepackage{hyperref} % Show boxes around hyper references
+\fi
+    \def\UrlBreaks{\do\/\do-}
+    \hypersetup{linkcolor = blue, colorlinks=false}
+
+\lstset{literate=%
+    {æ}{{\ae}}1
+    {å}{{\aa}}1
+    {ø}{{\o}}1
+    {Æ}{{\AE}}1
+    {Å}{{\AA}}1
+    {Ø}{{\O}}1,
+    escapeinside={\%*}{*)}
+}
+\definecolor{mylilas}{RGB}{170,55,241}
+\definecolor{mygreen}{RGB}{28,172,0}
+\lstdefinestyle{Matlab}{
+    breaklines=true,
+    morekeywords={matlab2tikz},
+    keywordstyle=\color{blue},
+    morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},
+    stringstyle=\color{mylilas},
+    commentstyle=\color{mygreen},
+    morecomment=[l][\color{mygreen}]{\%},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle={\tiny \color{black}},
+    numbersep=9pt,
+    emph=[1]{for,end,break},emphstyle=[1]\color{blue},
+    basicstyle=\footnotesize
+}
+
+
+%pdf wiever dark mode
+%\pagecolor[rgb]{0,0,0}
+%\color[rgb]{1, 0.5, 0}
+%\color[rgb]{1, 1, 1}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Date: 26-05-2023}
+\lhead{Group nr. 4}
+\chead{\newcommand \tab[1][2 cm] {\hspace*{2 cm}} Project in Advanced Robotics}
+
+\renewcommand{\headrulewidth}{1pt}
+
+\pgfplotsset{compat=1.18}
+\setlength{\headheight}{14.49998pt}
+
+\begin{document}
+    \subfile{Setup/nFrontpage}
+    \pagebreak
+
+    \subfile{Sections/Assignments.tex}
+    \pagebreak
+    
+    \frenchspacing
+    \subfile{Sections/Abstract.tex}
+    \pagebreak
+
+    \subfile{Sections/02.ProjectDescription.tex}
+    \pagebreak
+
+    
+    %\setcounter{tocdepth}{3} % set depth
+    \tableofcontents
+    \pagebreak
+    
+    % Page numbering for the main sections
+    \pagenumbering{arabic}
+    \fancyfoot[L]{\includegraphics[width=2cm]{Tables and Images/MainDocument/small_sdu.png}}
+    \fancyfoot[R]{Page \thepage\ of \pageref{mylastpage}}
+
+    \frenchspacing
+    \subfile{Sections/01.Introduction.tex}
+    \pagebreak
+
+    \subfile{Sections/03.ProblemAnalyse.tex}
+    \pagebreak
+    
+    % Implementation
+    \subfile{Sections/04.Implementing.tex}
+    
+    % Experiments
+    \subfile{Sections/05.Experiments.tex}
+    \pagebreak
+    
+    \subfile{Sections/06.Discussion.tex}
+    \pagebreak
+    
+    \subfile{Sections/07.Conclusion.tex}
+    \pagebreak
+
+    % Change page numbering for the last two sections
+    \pagenumbering{Roman}
+    \fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+    
+    \subfile{Sections/08.Literature.tex}
+    \pagebreak
+    
+    \subfile{Sections/09.Appendixes.tex}
+    \pagebreak
+            
+\end{document}
