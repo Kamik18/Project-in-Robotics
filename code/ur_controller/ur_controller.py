@@ -28,8 +28,8 @@ class URController(object):
     # Home position
     home: list = [0.0, 0.1, 0.25]  # (m), (x, y, z)
 
-    VELOCITY: float = 0.1
-    ACCELERATION: float = 0.1
+    VELOCITY: float = 0.25
+    ACCELERATION: float = 1.0
 
     def __init__(self) -> None:
         """Constructor for URController
@@ -326,54 +326,197 @@ class URController(object):
 
         # Orientation set
         return True
+    
+    def place_cup_script(self, n_cup):
+        
+        # home pick 
+        self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+       
 
+        self.digital_out(pin=D_OUT_GRIPPER, value=True)
+        self.rtde_c.moveL([-0.2027, -0.81958, 0.25188, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup home
+        self.rtde_c.moveL([-0.12413, -0.89818, 0.25199, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup PICK
+        self.digital_out(pin=D_OUT_GRIPPER, value=False)
+        self.rtde_c.moveL([-0.11319, -0.88726, 0.25204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup VENSTRE
+        self.rtde_c.moveL([-0.13407, -0.90812, 0.25199, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup HOJRE
+        self.rtde_c.moveL([-0.12413, -0.89818, 0.25199, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup PICK
+        self.rtde_c.moveL([-0.12415, -0.89818, 0.22666, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup down
+        self.rtde_c.moveL([-0.19675, -0.82559, 0.21834, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup lEAVE
+
+        if n_cup == 1:
+            self.rtde_c.moveL([-0.05950, -0.50416, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Place 1 home
+            self.rtde_c.moveL([-0.06629, -0.49892, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Place 1 
+            
+        if n_cup == 2:
+            
+            self.rtde_c.moveL([0.00981, -0.57683, 0.21432, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 home
+            self.rtde_c.moveL([0.00981, -0.57683, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 
+        
+        if n_cup == 3:
+            
+            self.rtde_c.moveL([0.00554, -0.43208, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 3 home
+            self.rtde_c.moveL([0.00554, -0.43208, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 3 
+        
+        if n_cup == 4:
+            self.rtde_c.moveL([0.079, -0.50502, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 home
+            self.rtde_c.moveL([0.079, -0.50502, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 
+            
+            # self.rtde_c.moveL([-0.06372, -0.36292, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 home
+            # self.rtde_c.moveL([-0.06372, -0.36292, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 
+
+        
+            
+        self.digital_out(pin=D_OUT_GRIPPER, value=True)
+        x, y, z, rx, ry, rz = self.rtde_r.getActualTCPPose()
+        self.rtde_c.moveL([x, y, 0.21832, rx, ry, rz], self.VELOCITY, self.ACCELERATION, False) # Home leave
+        
+        print("Cup script done")
+
+    def move_home(self): 
+        self.rtde_c.moveL([0.32978, -0.43165, 0.28722, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Home pos
+
+    def move_home_pick_block(self): 
+        self.rtde_c.moveL([-0.15395, -0.525, 0.29154, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Home pos
+
+    def pick_plant_block(self):
+
+        self.rtde_c.moveL([-0.08313, -0.44345, 0.17514, 3.449, -0.017, 2.413], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.53622, -0.87409, 0.32362, 3.531, -0.055, 1.586], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.56960, -0.90760, 0.40429, 3.531, -0.055, 1.586], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.31115, -0.64913, 0.41214, 3.531, -0.055, 1.586], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.26546, -0.59825, 0.40548, 3.475, -0.107, 2.181], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.32450, -0.67816, 0.12594, 3.367, -0.023, 2.373], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.32449, -0.67819, 0.08564, 3.367, -0.023, 2.373], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.08316, -0.44349, 0.08217, 3.449, -0.017, 2.412], self.VELOCITY, self.ACCELERATION, False)# waypoint 8 
+
+        self.rtde_c.moveL([-0.08311, -0.44344, 0.23896, 3.449, -0.017, 2.413], self.VELOCITY, self.ACCELERATION, False)# waypoint 9
+        
+        joint = [54.16, -77.21, 124.56, -47.11, 41.04, 135.80]
+        # deg to rad
+        joint = [i * np.pi / 180 for i in joint]
+        self.rtde_c.moveJ(joint, self.VELOCITY, self.ACCELERATION, False)
+
+        #self.rtde_c.moveL([-0.13816, -0.63873, 0.23830, 0.948, -1.750, 1.917], self.VELOCITY, self.ACCELERATION, False)# waypoint 7
+
+        # Time to push 
+        self.rtde_c.moveL([-0.40623, -0.74586, 0.29038, 1.116, -1.104, -0.010], self.VELOCITY, self.ACCELERATION, False)# push 
+        self.rtde_c.moveL([-0.50253, -0.66999, 0.18183, 1.116, -1.104, -0.010], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.50256, -0.66997, 0.11111, 1.116, -1.104, -0.010], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.50253, -0.66999, 0.18183, 1.116, -1.104, -0.010], self.VELOCITY, self.ACCELERATION, False)
+        
+        self.rtde_c.moveL([-0.31937, -0.85095, 0.18689, 1.116, -1.104, -0.010], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.31943, -0.85098, 0.11551, 1.116, -1.104, -0.010], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.31937, -0.85095, 0.18689, 1.116, -1.104, -0.010], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.40623, -0.74586, 0.29038, 1.116, -1.104, -0.010], self.VELOCITY, self.ACCELERATION, False)# push 
+        
+        # Home
+        joint = [51.60, -66.78, 104.97, -42.21, -8.20, 42.93]
+        # deg to rad
+        joint = [i * np.pi / 180 for i in joint]
+        self.rtde_c.moveJ(joint, self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.08313, -0.44345, 0.17514, 3.449, -0.017, 2.413], self.VELOCITY, self.ACCELERATION, False)
+        
+
+
+    def pic_pland_and_place(self):
+        # open gripper
+        self.digital_out(pin=D_OUT_GRIPPER, value=True) # open gripper
+        # move to home
+        self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+
+        # pick 1
+        self.rtde_c.moveL([-0.48228, -0.68853, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False) # Home pick 1
+        self.rtde_c.moveL([-0.48228, -0.68853, 0.13634, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False) # pick pos
+        self.digital_out(pin=D_OUT_GRIPPER, value=False)
+        self.rtde_c.moveL([-0.48228, -0.68853, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+
+
+
+        # place 1
+        self.rtde_c.moveL([0.00464, -0.57504, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Place 1 home
+        self.rtde_c.moveL([0.00464, -0.57504, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Place 1 
+        self.digital_out(pin=D_OUT_GRIPPER, value=True)
+        self.rtde_c.moveL([0.00464, -0.57504, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Place 1 home
+           
+        #HOME
+        self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+
+    
+
+        # pick 2
+        self.rtde_c.moveL([-0.50963, -0.65808, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.51067, -0.65905, 0.13634, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.digital_out(pin=D_OUT_GRIPPER, value=False)
+        self.rtde_c.moveL([-0.50963, -0.65808, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        
+
+        # place 2
+        self.rtde_c.moveL([0.073, -0.64652, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.073, -0.64652, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.digital_out(pin=D_OUT_GRIPPER, value=True)
+        self.rtde_c.moveL([0.073, -0.64652, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+
+
+        #HOME
+        self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+       
+
+
+
+        # pick 3
+        self.rtde_c.moveL([-0.54141, -0.68827, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.54141, -0.68827, 0.13634, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.digital_out(pin=D_OUT_GRIPPER, value=False)
+
+        self.rtde_c.moveL([-0.54141, -0.68827, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        
+
+        # place 3
+        self.rtde_c.moveL([0.14416, -0.57479, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.14416, -0.57479, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.digital_out(pin=D_OUT_GRIPPER, value=True)
+        self.rtde_c.moveL([0.14416, -0.57479, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+
+
+        #HOME
+        self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        
+
+
+
+        # pick 4
+        self.rtde_c.moveL([-0.51091, -0.72199, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.51091, -0.72199, 0.13687, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.digital_out(pin=D_OUT_GRIPPER, value=False)
+        self.rtde_c.moveL([-0.51091, -0.72199, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        
+
+        # place 4
+        self.rtde_c.moveL([0.07815, -0.507, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.07815, -0.507, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.digital_out(pin=D_OUT_GRIPPER, value=True)
+        self.rtde_c.moveL([0.07815, -0.507, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+
+        # Home pos again
+        self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+
+    
 
 if __name__ == "__main__":
     print("URController started!")
     # Universal Robots controller
     ur_controller = URController()
+    
+    ur_controller.pick_plant_block()
+
+    
+    for i in range(4):    
+        ur_controller.place_cup_script(i+1)
+
+    ur_controller.pic_pland_and_place()
+
 
     # Test digital output
-    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=False)
-    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=True)
+    
+    
 
-    # Home the robot
-    ur_controller.move_to_home()
-
-    # Calibrate force sensor
-    ur_controller.calibrate_force_sensor()
-
-    # Test height
-    ur_controller.move_height(z=0.13)
-    ur_controller.move_height(z=0.25)
-    ur_controller.move_height(z=0.13, force=3.0)
-    ur_controller.move_height(z=0.25)
-
-    # Pick and place 0.3, 0.3
-    ur_controller.move_to_object(x=0.3, y=0.3)
-    ur_controller.move_height(z=0.095, force=3.0)
-    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=False)
-    ur_controller.move_height(z=0.25)
-    ur_controller.move_height(z=0.095, force=3.0)
-    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=True)
-    ur_controller.move_height(z=0.25)
-
-    # Pick and place 0.1, 0.5
-    ur_controller.move_to_object(x=0.1, y=0.5)
-    ur_controller.move_height(z=0.095, force=3.0)
-    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=False)
-    ur_controller.move_height(z=0.25)
-    ur_controller.move_height(z=0.095, force=3.0)
-    ur_controller.digital_out(pin=D_OUT_GRIPPER, value=True)
-    ur_controller.move_height(z=0.25)
-
-    # Test orientation
-    ur_controller.set_orientation(ORIENTATION_LEFT)
-    ur_controller.move_to_object(x=0.1, y=0.5)
-    ur_controller.set_orientation(ORIENTATION_RIGHT)
-    ur_controller.move_to_object(x=0.1, y=0.5)
-    ur_controller.set_orientation(ORIENTATION_CENTER)
-    ur_controller.move_to_object(x=0.1, y=0.5)
-
-    # Return home
-    ur_controller.move_to_home()
