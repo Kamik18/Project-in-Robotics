@@ -5,8 +5,9 @@ from rtde_receive import RTDEReceiveInterface as RTDEReceive
 from rtde_io import RTDEIOInterface as RTDEIO
 import numpy as np
 import cv2
-
-
+# import sleep
+from time import sleep
+import os
 # Digital output pins
 D_OUT_GRIPPER = 4
 
@@ -28,8 +29,8 @@ class URController(object):
     # Home position
     home: list = [0.0, 0.1, 0.25]  # (m), (x, y, z)
 
-    VELOCITY: float = 0.25
-    ACCELERATION: float = 1.0
+    VELOCITY: float = 2.0
+    ACCELERATION: float = 1.5
 
     def __init__(self) -> None:
         """Constructor for URController
@@ -125,6 +126,10 @@ class URController(object):
 
         return True
 
+
+    def beep(self):
+        os.system(f"play -nq -t alsa synth {0.5} sine {440}")
+
     def _move(self, position: list, speed: float = VELOCITY, acceleration: float = ACCELERATION, assync: bool = False) -> None:
         """Moves the robot to the given position
 
@@ -154,7 +159,7 @@ class URController(object):
         if not self.rtde_c.zeroFtSensor():
             self.logger.error("Failed to zero force sensor")
             return False
-        time.sleep(0.2)
+        time.cp(0.2)
 
         self.logger.info("Force sensor calibrated")
 
@@ -349,8 +354,11 @@ class URController(object):
             
         if n_cup == 2:
             
-            self.rtde_c.moveL([0.00981, -0.57683, 0.21432, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 home
-            self.rtde_c.moveL([0.00981, -0.57683, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 
+            # self.rtde_c.moveL([0.00981, -0.57683, 0.21432, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 home
+            # self.rtde_c.moveL([0.00981, -0.57683, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 
+        
+            self.rtde_c.moveL([0.00166, -0.57061, 0.21432, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 home
+            self.rtde_c.moveL([0.00166, -0.57061, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 
         
         if n_cup == 3:
             
@@ -358,8 +366,8 @@ class URController(object):
             self.rtde_c.moveL([0.00554, -0.43208, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 3 
         
         if n_cup == 4:
-            self.rtde_c.moveL([0.079, -0.50502, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 home
-            self.rtde_c.moveL([0.079, -0.50502, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 
+            self.rtde_c.moveL([0.07255, -0.49863, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 home
+            self.rtde_c.moveL([0.07255, -0.49863, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 
             
             # self.rtde_c.moveL([-0.06372, -0.36292, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 home
             # self.rtde_c.moveL([-0.06372, -0.36292, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 
@@ -381,11 +389,16 @@ class URController(object):
     def pick_plant_block(self):
 
         self.rtde_c.moveL([-0.08313, -0.44345, 0.17514, 3.449, -0.017, 2.413], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.40676, -0.74598, 0.23014, 3.531, -0.055, 1.58], self.VELOCITY, self.ACCELERATION, False)
+    
         self.rtde_c.moveL([-0.53622, -0.87409, 0.32362, 3.531, -0.055, 1.586], self.VELOCITY, self.ACCELERATION, False)
+        
         self.rtde_c.moveL([-0.56960, -0.90760, 0.40429, 3.531, -0.055, 1.586], self.VELOCITY, self.ACCELERATION, False)
+        
         self.rtde_c.moveL([-0.31115, -0.64913, 0.41214, 3.531, -0.055, 1.586], self.VELOCITY, self.ACCELERATION, False)
         self.rtde_c.moveL([-0.26546, -0.59825, 0.40548, 3.475, -0.107, 2.181], self.VELOCITY, self.ACCELERATION, False)
         self.rtde_c.moveL([-0.32450, -0.67816, 0.12594, 3.367, -0.023, 2.373], self.VELOCITY, self.ACCELERATION, False)
+        
         self.rtde_c.moveL([-0.32449, -0.67819, 0.08564, 3.367, -0.023, 2.373], self.VELOCITY, self.ACCELERATION, False)
         self.rtde_c.moveL([-0.08316, -0.44349, 0.08217, 3.449, -0.017, 2.412], self.VELOCITY, self.ACCELERATION, False)# waypoint 8 
 
@@ -394,7 +407,7 @@ class URController(object):
         joint = [54.16, -77.21, 124.56, -47.11, 41.04, 135.80]
         # deg to rad
         joint = [i * np.pi / 180 for i in joint]
-        self.rtde_c.moveJ(joint, self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveJ(joint, np.pi/2, np.pi, False)
 
         #self.rtde_c.moveL([-0.13816, -0.63873, 0.23830, 0.948, -1.750, 1.917], self.VELOCITY, self.ACCELERATION, False)# waypoint 7
 
@@ -413,7 +426,7 @@ class URController(object):
         joint = [51.60, -66.78, 104.97, -42.21, -8.20, 42.93]
         # deg to rad
         joint = [i * np.pi / 180 for i in joint]
-        self.rtde_c.moveJ(joint, self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveJ(joint,  np.pi/2,  np.pi, False)
         self.rtde_c.moveL([-0.08313, -0.44345, 0.17514, 3.449, -0.017, 2.413], self.VELOCITY, self.ACCELERATION, False)
         
 
@@ -425,12 +438,10 @@ class URController(object):
         self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
 
         # pick 1
-        self.rtde_c.moveL([-0.48228, -0.68853, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False) # Home pick 1
-        self.rtde_c.moveL([-0.48228, -0.68853, 0.13634, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False) # pick pos
+        self.rtde_c.moveL([-0.48297, -0.68931, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False) # Home pick 1
+        self.rtde_c.moveL([-0.48297, -0.68931, 0.13597, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False) # pick pos
         self.digital_out(pin=D_OUT_GRIPPER, value=False)
-        self.rtde_c.moveL([-0.48228, -0.68853, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
-
-
+        self.rtde_c.moveL([-0.48297, -0.68931, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
 
         # place 1
         self.rtde_c.moveL([0.00464, -0.57504, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Place 1 home
@@ -444,38 +455,36 @@ class URController(object):
     
 
         # pick 2
-        self.rtde_c.moveL([-0.50963, -0.65808, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
-        self.rtde_c.moveL([-0.51067, -0.65905, 0.13634, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.54185, -0.68828, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.54185, -0.68828, 0.13597, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
         self.digital_out(pin=D_OUT_GRIPPER, value=False)
-        self.rtde_c.moveL([-0.50963, -0.65808, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.54185, -0.68828, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
         
 
         # place 2
-        self.rtde_c.moveL([0.073, -0.64652, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
-        self.rtde_c.moveL([0.073, -0.64652, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.07667, -0.64458, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.07667, -0.64458, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
         self.digital_out(pin=D_OUT_GRIPPER, value=True)
-        self.rtde_c.moveL([0.073, -0.64652, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
-
+        self.rtde_c.moveL([0.07667, -0.64458, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
 
         #HOME
         self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
        
 
 
-
         # pick 3
-        self.rtde_c.moveL([-0.54141, -0.68827, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
-        self.rtde_c.moveL([-0.54141, -0.68827, 0.13634, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.50773, -0.66181, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.50773, -0.66181, 0.13597, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
         self.digital_out(pin=D_OUT_GRIPPER, value=False)
 
-        self.rtde_c.moveL([-0.54141, -0.68827, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.50773, -0.66181, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
         
 
         # place 3
-        self.rtde_c.moveL([0.14416, -0.57479, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
-        self.rtde_c.moveL([0.14416, -0.57479, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.14653, -0.57453, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.14653, -0.57453, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
         self.digital_out(pin=D_OUT_GRIPPER, value=True)
-        self.rtde_c.moveL([0.14416, -0.57479, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.14653, -0.57453, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
 
 
         #HOME
@@ -483,39 +492,42 @@ class URController(object):
         
 
 
-
+        
         # pick 4
         self.rtde_c.moveL([-0.51091, -0.72199, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
-        self.rtde_c.moveL([-0.51091, -0.72199, 0.13687, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([-0.51091, -0.72199, 0.13597, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
         self.digital_out(pin=D_OUT_GRIPPER, value=False)
         self.rtde_c.moveL([-0.51091, -0.72199, 0.22378, 3.139, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
-        
+        self.beep()
 
         # place 4
-        self.rtde_c.moveL([0.07815, -0.507, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
-        self.rtde_c.moveL([0.07815, -0.507, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.07759, -0.50158, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.07759, -0.50158, 0.147, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
         self.digital_out(pin=D_OUT_GRIPPER, value=True)
-        self.rtde_c.moveL([0.07815, -0.507, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
+        self.rtde_c.moveL([0.07759, -0.50158, 0.204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)
 
         # Home pos again
         self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
 
-    
+
 
 if __name__ == "__main__":
     print("URController started!")
     # Universal Robots controller
     ur_controller = URController()
     
-    ur_controller.pick_plant_block()
+    for j in range(70):    
+        ur_controller.pick_plant_block()
+        for i in range(4):    
+            ur_controller.place_cup_script(i+1)
 
+        ur_controller.pic_pland_and_place()
+        
+        print ("repeat script j: ", j+24)
+        
+        sleep(10)
     
-    for i in range(4):    
-        ur_controller.place_cup_script(i+1)
-
-    ur_controller.pic_pland_and_place()
-
-
+    print ("Done")
     # Test digital output
     
     
