@@ -517,10 +517,8 @@ if __name__ == "__main__":
     # Universal Robots controller
     ur_controller = URController()
     # 51 +9 + 4 = 64
-    
-
-    
-    for j in range(36):    
+   
+    for j in range(1):    
         ur_controller.pick_plant_block()
         for i in range(4):    
             ur_controller.place_cup_script(i+1)
