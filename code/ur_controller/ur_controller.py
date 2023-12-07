@@ -335,6 +335,7 @@ class URController(object):
     def place_cup_script(self, n_cup):
         
         # home pick 
+        ACC = self.ACCELERATION - 0.5
         self.rtde_c.moveL([-0.08311, -0.44345, 0.26290, 3.167, 0.021, 0.0], self.VELOCITY, self.ACCELERATION, False)
        
 
@@ -344,30 +345,30 @@ class URController(object):
         self.digital_out(pin=D_OUT_GRIPPER, value=False)
         self.rtde_c.moveL([-0.11319, -0.88726, 0.25204, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup VENSTRE
         self.rtde_c.moveL([-0.13407, -0.90812, 0.25199, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup HOJRE
-        self.rtde_c.moveL([-0.12413, -0.89818, 0.25199, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup PICK
-        self.rtde_c.moveL([-0.12415, -0.89818, 0.22666, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup down
-        self.rtde_c.moveL([-0.19675, -0.82559, 0.21834, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Cup lEAVE
+        self.rtde_c.moveL([-0.12413, -0.89818, 0.25199, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False) # Cup PICK
+        self.rtde_c.moveL([-0.12415, -0.89818, 0.22666, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False) # Cup down
+        self.rtde_c.moveL([-0.19675, -0.82559, 0.21834, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False) # Cup lEAVE
 
         if n_cup == 1:
-            self.rtde_c.moveL([-0.05950, -0.50416, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Place 1 home
-            self.rtde_c.moveL([-0.06629, -0.49892, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False) # Place 1 
+            self.rtde_c.moveL([-0.05950, -0.50416, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False) # Place 1 home
+            self.rtde_c.moveL([-0.06629, -0.49892, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False) # Place 1 
             
         if n_cup == 2:
             
             # self.rtde_c.moveL([0.00981, -0.57683, 0.21432, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 home
             # self.rtde_c.moveL([0.00981, -0.57683, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 
         
-            self.rtde_c.moveL([0.00166, -0.57061, 0.21432, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 home
-            self.rtde_c.moveL([0.00166, -0.57061, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 2 
+            self.rtde_c.moveL([0.00166, -0.57061, 0.21432, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False)# Place 2 home
+            self.rtde_c.moveL([0.00166, -0.57061, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False)# Place 2 
         
         if n_cup == 3:
             
-            self.rtde_c.moveL([0.00554, -0.43208, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 3 home
-            self.rtde_c.moveL([0.00554, -0.43208, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 3 
+            self.rtde_c.moveL([0.00554, -0.43208, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False)# Place 3 home
+            self.rtde_c.moveL([0.00554, -0.43208, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False)# Place 3 
         
         if n_cup == 4:
-            self.rtde_c.moveL([0.07255, -0.49863, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 home
-            self.rtde_c.moveL([0.07255, -0.49863, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 
+            self.rtde_c.moveL([0.07255, -0.49863, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False)# Place 4 home
+            self.rtde_c.moveL([0.07255, -0.49863, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, ACC, False)# Place 4 
             
             # self.rtde_c.moveL([-0.06372, -0.36292, 0.21832, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 home
             # self.rtde_c.moveL([-0.06372, -0.36292, 0.15369, 3.142, 0.0, 0.0], self.VELOCITY, self.ACCELERATION, False)# Place 4 
@@ -515,15 +516,18 @@ if __name__ == "__main__":
     print("URController started!")
     # Universal Robots controller
     ur_controller = URController()
+    # 51 +9 + 4 = 64
     
-    for j in range(70):    
+
+    
+    for j in range(36):    
         ur_controller.pick_plant_block()
         for i in range(4):    
             ur_controller.place_cup_script(i+1)
 
         ur_controller.pic_pland_and_place()
         
-        print ("repeat script j: ", j+24)
+        print ("repeat script j: ", 100 - j+1)
         
         sleep(10)
     
